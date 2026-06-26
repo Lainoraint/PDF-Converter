@@ -9,23 +9,20 @@ abstract class ConvertState extends Equatable {
 }
 
 class ConvertInitial extends ConvertState {}
-
 class ConvertLoading extends ConvertState {}
 
 class ConvertSuccess extends ConvertState {
-  final File pdfFile;
+  final File outputFile; 
 
-  const ConvertSuccess(this.pdfFile);
+  const ConvertSuccess(this.outputFile);
 
   @override
-  List<Object> get props => [pdfFile];
+  List<Object> get props => [outputFile];
 }
 
 class ConvertFailure extends ConvertState {
   final String errorMessage;
-
   const ConvertFailure(this.errorMessage);
-
   @override
   List<Object> get props => [errorMessage];
 }

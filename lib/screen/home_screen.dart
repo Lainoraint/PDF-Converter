@@ -75,6 +75,63 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 32),
+              const Text(
+                'Atau dari PDF ke format lain:',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              _buildBentoCard(
+                context: context,
+                title: 'PDF to Word',
+                subtitle: 'Konversi ke .docx',
+                icon: Icons.article_rounded,
+                iconColor: Colors.orange,
+                iconBgColor: Colors.orange.withValues(alpha: 0.1),
+                allowedExtensions: ['pdf'],
+                isFullWidth: true,
+                isFromPdf: true,
+                targetFormat: 'docx',
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildBentoCard(
+                      context: context,
+                      title: 'PDF to Excel',
+                      subtitle: 'Konversi ke .xlsx',
+                      icon: Icons.grid_on_rounded,
+                      iconColor: Colors.teal,
+                      iconBgColor: Colors.teal.withValues(alpha: 0.1),
+                      allowedExtensions: ['pdf'],
+                      isFullWidth: false,
+                      isFromPdf: true,
+                      targetFormat: 'xlsx',
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildBentoCard(
+                      context: context,
+                      title: 'PDF to Image',
+                      subtitle: 'Konversi ke .png',
+                      icon: Icons.collections_rounded,
+                      iconColor: Colors.pinkAccent,
+                      iconBgColor: Colors.pink.withValues(alpha: 0.1),
+                      allowedExtensions: ['pdf'],
+                      isFullWidth: false,
+                      isFromPdf: true,
+                      targetFormat: 'png',
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -91,6 +148,8 @@ class HomeScreen extends StatelessWidget {
     required Color iconBgColor,
     required List<String> allowedExtensions,
     required bool isFullWidth,
+    bool isFromPdf = false,
+    String? targetFormat,
   }) {
     return InkWell(
       onTap: () {
@@ -101,6 +160,8 @@ class HomeScreen extends StatelessWidget {
               pageTitle: title,
               allowedExtensions: allowedExtensions,
               themeColor: iconColor,
+              isFromPdf: isFromPdf,
+              targetFormat: targetFormat,
             ),
           ),
         );

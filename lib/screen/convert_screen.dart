@@ -8,24 +8,36 @@ import '../bloc/convert/convert_bloc.dart';
 import '../bloc/convert/convert_event.dart';
 import '../bloc/convert/convert_state.dart';
 
-class ConvertScreen extends StatelessWidget {
+class ConvertScreen extends StatefulWidget {
   final String pageTitle;
   final List<String> allowedExtensions;
   final Color themeColor;
+  final bool isFromPdf;
+  final String? targetFormat;
 
   const ConvertScreen({
     super.key,
     required this.pageTitle,
     required this.allowedExtensions,
     required this.themeColor,
+    this.isFromPdf = false,
+    this.targetFormat,
   });
+
+  @override
+  State<ConvertScreen> createState() => _ConvertScreenState();
+}
+
+class _ConvertScreenState extends State<ConvertScreen> {
+  String _orientation = 'landscape';
+  bool get _showOrientationToggle => !widget.isFromPdf;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F7),
       appBar: AppBar(
-        title: Text(pageTitle),
+        title: Text(widget.pageTitle),
         backgroundColor: Colors.transparent,
         foregroundColor: const Color(0xFF1C1C1E),
         centerTitle: true,
@@ -38,36 +50,106 @@ class ConvertScreen extends StatelessWidget {
             listener: (context, state) {
               if (state is ConvertFailure) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.errorMessage),
-                    backgroundColor: Colors.red,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
+                  SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
                 );
               } else if (state is ConvertSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Konversi berhasil!'),
-                    backgroundColor: Colors.green,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
+                  const SnackBar(content: Text('Konversi berhasil!'), backgroundColor: Colors.green),
                 );
               }
             },
             builder: (context, state) {
-              if (state is ConvertLoading) {
-                return _buildLoadingCard();
-              }
-
-              if (state is ConvertSuccess) {
-                return _buildSuccessCard(context, state);
-              }
-
-              return _buildDropZone(context);
+              if (state is ConvertLoading) return _buildLoadingCard();
+              if (state is ConvertSuccess) return _buildSuccessCard(context, state);
+              return Column(
+                children: [
+                  if (_showOrientationToggle) _buildOrientationToggle(),
+                  if (_showOrientationToggle) const SizedBox(height: 16),
+                  _buildDropZone(context),
+                ],
+              );
             },
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrientationToggle() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Orientasi Halaman',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1C1C1E)),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _orientationOption(
+                  label: 'Landscape',
+                  value: 'landscape',
+                  icon: Icons.stay_current_landscape_rounded,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _orientationOption(
+                  label: 'Portrait',
+                  value: 'portrait',
+                  icon: Icons.stay_current_portrait_rounded,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _orientationOption({required String label, required String value, required IconData icon}) {
+    final bool selected = _orientation == value;
+    return InkWell(
+      onTap: () => setState(() => _orientation = value),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: selected ? widget.themeColor.withValues(alpha: 0.1) : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? widget.themeColor : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: selected ? widget.themeColor : Colors.grey.shade500, size: 22),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: selected ? widget.themeColor : Colors.grey.shade600,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -91,24 +173,17 @@ class ConvertScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(color: themeColor),
+          CircularProgressIndicator(color: widget.themeColor),
           const SizedBox(height: 32),
           const Text(
             'Memproses Dokumen...',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1C1C1E),
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1C1C1E)),
           ),
           const SizedBox(height: 8),
           Text(
             'Mohon tunggu sebentar di layar ini.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
           ),
         ],
       ),
@@ -116,7 +191,7 @@ class ConvertScreen extends StatelessWidget {
   }
 
   Widget _buildSuccessCard(BuildContext context, ConvertSuccess state) {
-    String fileName = state.pdfFile.path.split('/').last;
+    String fileName = state.outputFile.path.split('/').last;
 
     return Container(
       width: double.infinity,
@@ -154,12 +229,15 @@ class ConvertScreen extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () async {
                 try {
+                  if (!Platform.isAndroid) {
+                    throw Exception('Simpan ke Download saat ini hanya didukung di Android.');
+                  }
                   Directory downloadDir = Directory('/storage/emulated/0/Download');
                   if (!await downloadDir.exists()) {
                     await downloadDir.create(recursive: true);
                   }
                   String publicSavePath = '${downloadDir.path}/$fileName';
-                  await state.pdfFile.copy(publicSavePath);
+                  await state.outputFile.copy(publicSavePath);
                   final result = await OpenFilex.open(publicSavePath);
 
                   if (context.mounted) {
@@ -188,9 +266,9 @@ class ConvertScreen extends StatelessWidget {
                 }
               },
               icon: const Icon(Icons.download_rounded),
-              label: const Text('Simpan & Buka PDF'),
+              label: const Text('Simpan & Buka File'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: themeColor,
+                backgroundColor: widget.themeColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -203,7 +281,7 @@ class ConvertScreen extends StatelessWidget {
             width: double.infinity,
             child: TextButton(
               onPressed: () {
-                context.read<ConvertBloc>().add(ConvertFileStarted(File('reset_trigger')));
+                context.read<ConvertBloc>().add(ConvertReset());
                 Navigator.pop(context);
               },
               style: TextButton.styleFrom(
@@ -223,13 +301,18 @@ class ConvertScreen extends StatelessWidget {
       onTap: () async {
         FilePickerResult? result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
-          allowedExtensions: allowedExtensions,
+          allowedExtensions: widget.allowedExtensions,
         );
 
         if (result != null && result.files.single.path != null) {
           File selectedFile = File(result.files.single.path!);
           if (context.mounted) {
-            context.read<ConvertBloc>().add(ConvertFileStarted(selectedFile));
+            context.read<ConvertBloc>().add(ConvertFileStarted(
+              inputFile: selectedFile,
+              isFromPdf: widget.isFromPdf,
+              targetFormat: widget.targetFormat,
+              orientation: _orientation,
+            ));
           }
         }
       },
@@ -240,10 +323,10 @@ class ConvertScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: themeColor.withValues(alpha: 0.3), width: 2),
+          border: Border.all(color: widget.themeColor.withValues(alpha: 0.3), width: 2),
           boxShadow: [
             BoxShadow(
-              color: themeColor.withValues(alpha: 0.05),
+              color: widget.themeColor.withValues(alpha: 0.05),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -254,28 +337,20 @@ class ConvertScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: themeColor.withValues(alpha: 0.1),
+                color: widget.themeColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.cloud_upload_rounded, size: 56, color: themeColor),
+              child: Icon(Icons.cloud_upload_rounded, size: 56, color: widget.themeColor),
             ),
             const SizedBox(height: 24),
             const Text(
               'Ketuk untuk mengunggah',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1C1C1E),
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1C1C1E)),
             ),
             const SizedBox(height: 8),
             Text(
-              'Mendukung format: ${allowedExtensions.join(', ')}',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-                fontWeight: FontWeight.w500,
-              ),
+              'Mendukung format: ${widget.allowedExtensions.join(', ')}',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
             ),
           ],
         ),
