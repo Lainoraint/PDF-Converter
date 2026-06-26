@@ -7,61 +7,90 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Multi Converter Hub'),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Pilih Jenis Konversi',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 32),
-            
-            _buildMenuCard(
-              context: context,
-              title: 'Word to PDF',
-              icon: Icons.description,
-              color: Colors.blue,
-              allowedExtensions: ['doc', 'docx'],
-            ),
-            const SizedBox(height: 16),
-            
-            _buildMenuCard(
-              context: context,
-              title: 'Excel to PDF',
-              icon: Icons.table_chart,
-              color: Colors.green,
-              allowedExtensions: ['xls', 'xlsx'],
-            ),
-            const SizedBox(height: 16),
-            
-            _buildMenuCard(
-              context: context,
-              title: 'Image to PDF',
-              icon: Icons.image,
-              color: Colors.purple,
-              allowedExtensions: ['png', 'jpg', 'jpeg'],
-            ),
-          ],
+      backgroundColor: const Color(0xFFF5F5F7),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Selamat Datang,',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Pilih format konversi\nhari ini.',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1C1C1E),
+                  height: 1.2,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 40),
+              _buildBentoCard(
+                context: context,
+                title: 'Word to PDF',
+                subtitle: 'Mendukung format .doc & .docx',
+                icon: Icons.description_rounded,
+                iconColor: Colors.blueAccent,
+                iconBgColor: Colors.blue.withOpacity(0.1),
+                allowedExtensions: ['doc', 'docx'],
+                isFullWidth: true,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildBentoCard(
+                      context: context,
+                      title: 'Excel to PDF',
+                      subtitle: '.xls & .xlsx',
+                      icon: Icons.table_chart_rounded,
+                      iconColor: Colors.green,
+                      iconBgColor: Colors.green.withOpacity(0.1),
+                      allowedExtensions: ['xls', 'xlsx'],
+                      isFullWidth: false,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildBentoCard(
+                      context: context,
+                      title: 'Image to PDF',
+                      subtitle: '.png & .jpg',
+                      icon: Icons.image_rounded,
+                      iconColor: Colors.purpleAccent,
+                      iconBgColor: Colors.purple.withOpacity(0.1),
+                      allowedExtensions: ['png', 'jpg', 'jpeg'],
+                      isFullWidth: false,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildMenuCard({
+  Widget _buildBentoCard({
     required BuildContext context,
     required String title,
+    required String subtitle,
     required IconData icon,
-    required Color color,
+    required Color iconColor,
+    required Color iconBgColor,
     required List<String> allowedExtensions,
+    required bool isFullWidth,
   }) {
     return InkWell(
       onTap: () {
@@ -71,33 +100,68 @@ class HomeScreen extends StatelessWidget {
             builder: (context) => ConvertScreen(
               pageTitle: title,
               allowedExtensions: allowedExtensions,
-              themeColor: color,
+              themeColor: iconColor,
             ),
           ),
         );
       },
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(24),
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(isFullWidth ? 24 : 20),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          border: Border.all(color: color.withValues(alpha: 0.5), width: 2),
-          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey.shade200, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 40, color: color),
-            const SizedBox(width: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: iconBgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 32, color: iconColor),
+                ),
+                if (isFullWidth)
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.grey.shade300,
+                    size: 20,
+                  ),
+              ],
+            ),
+            SizedBox(height: isFullWidth ? 32 : 24),
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: color,
+                color: Color(0xFF1C1C1E),
+                letterSpacing: -0.3,
               ),
             ),
-            const Spacer(),
-            Icon(Icons.arrow_forward_ios, color: color),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
       ),
