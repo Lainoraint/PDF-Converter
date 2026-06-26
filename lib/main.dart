@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'repository/document_repository.dart';
 import 'bloc/convert/convert_bloc.dart';
-import 'screen/convert_screen.dart';
+import 'screen/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
           ),
-          home: const ConvertScreen(),
+          home: const HomeScreen(),
         ),
       ),
     );

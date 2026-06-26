@@ -9,13 +9,24 @@ import '../bloc/convert/convert_event.dart';
 import '../bloc/convert/convert_state.dart';
 
 class ConvertScreen extends StatelessWidget {
-  const ConvertScreen({super.key});
+  final String pageTitle;
+  final List<String> allowedExtensions;
+  final Color themeColor;
+
+  const ConvertScreen({
+    super.key,
+    required this.pageTitle,
+    required this.allowedExtensions,
+    required this.themeColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Doc to PDF Converter'),
+        title: Text(pageTitle),
+        backgroundColor: themeColor,
+        foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
       ),
@@ -117,19 +128,19 @@ class ConvertScreen extends StatelessWidget {
                       icon: const Icon(Icons.download_for_offline),
                       label: const Text('Simpan & Buka File'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor: themeColor,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
                     ),
                     const SizedBox(height: 32),
-                ],
+                  ],
 
                   ElevatedButton.icon(
                     onPressed: () async {
                       FilePickerResult? result = await FilePicker.platform.pickFiles(
                         type: FileType.custom,
-                        allowedExtensions: ['png', 'jpg', 'jpeg', 'doc', 'docx', 'xls', 'xlsx'],
+                        allowedExtensions: allowedExtensions,
                       );
 
                       if (result != null && result.files.single.path != null) {
@@ -151,6 +162,9 @@ class ConvertScreen extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      backgroundColor: themeColor.withValues(alpha: 0.1),
+                      foregroundColor: themeColor,
+                      elevation: 0,
                     ),
                   ),
                 ]
