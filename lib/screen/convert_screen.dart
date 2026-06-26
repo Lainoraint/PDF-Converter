@@ -30,7 +30,11 @@ class ConvertScreen extends StatefulWidget {
 
 class _ConvertScreenState extends State<ConvertScreen> {
   String _orientation = 'landscape';
-  bool get _showOrientationToggle => !widget.isFromPdf;
+  bool get _showOrientationToggle {
+    if (widget.isFromPdf) return false;
+    const excelExtensions = ['xls', 'xlsx'];
+    return widget.allowedExtensions.any((ext) => excelExtensions.contains(ext.toLowerCase()));
+  }
 
   @override
   Widget build(BuildContext context) {
